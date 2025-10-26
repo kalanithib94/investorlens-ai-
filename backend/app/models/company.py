@@ -55,7 +55,7 @@ class Company(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
     # Additional data as JSON
-    metadata = Column(JSON, nullable=True)
+    extra_data = Column(JSON, nullable=True)
     
     # Relationships
     metrics = relationship("Metric", back_populates="company", cascade="all, delete-orphan")
