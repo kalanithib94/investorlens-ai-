@@ -1,0 +1,2 @@
+"""InvestorLens AI Backend Application"""
+
