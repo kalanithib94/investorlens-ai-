@@ -15,6 +15,8 @@ const Dashboard = () => {
   const [alertStats, setAlertStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState('risk_score'); // risk_score, current_arr, name
+  const [filterIndustry, setFilterIndustry] = useState('all');
 
   // Fetch data on mount
   useEffect(() => {
@@ -44,6 +46,28 @@ const Dashboard = () => {
     }
   };
 
+  // Filter and sort companies
+  const filteredAndSortedCompanies = () => {
+    let filtered = [...companies];
+    
+    // Apply filter
+    if (filterIndustry !== 'all') {
+      filtered = filtered.filter(c => c.industry === filterIndustry);
+    }
+    
+    // Apply sort
+    filtered.sort((a, b) => {
+      if (sortBy === 'risk_score') return (b.risk_score || 0) - (a.risk_score || 0); // High to low
+      if (sortBy === 'current_arr') return (b.current_arr || 0) - (a.current_arr || 0); // High to low
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      return 0;
+    });
+    
+    return filtered;
+  };
+
+  const displayedCompanies = filteredAndSortedCompanies();
+
   // Calculate portfolio stats
   const portfolioStats = {
     totalCompanies: companies.length,
@@ -53,6 +77,31 @@ const Dashboard = () => {
       : 0,
     totalAlerts: alertStats.total_unresolved || 0,
     criticalAlerts: alertStats.critical || 0,
+  };
+
+  // Button handlers
+  const handleAddCompany = () => {
+    alert('Add Company feature coming soon! For demo, companies are pre-loaded.');
+  };
+
+  const handleSort = () => {
+    // Cycle through sort options
+    const sortOptions = ['risk_score', 'current_arr', 'name'];
+    const currentIndex = sortOptions.indexOf(sortBy);
+    const nextIndex = (currentIndex + 1) % sortOptions.length;
+    setSortBy(sortOptions[nextIndex]);
+    
+    const sortLabels = { risk_score: 'Risk Score', current_arr: 'Revenue (ARR)', name: 'Name' };
+    alert(`Sorted by: ${sortLabels[sortOptions[nextIndex]]}`);
+  };
+
+  const handleFilter = () => {
+    const industries = ['all', 'AI', 'SaaS', 'FinTech', 'Healthcare', 'Retail', 'CleanTech', 'EdTech', 'Security'];
+    const currentIndex = industries.indexOf(filterIndustry);
+    const nextIndex = (currentIndex + 1) % industries.length;
+    setFilterIndustry(industries[nextIndex]);
+    
+    alert(industries[nextIndex] === 'all' ? 'Showing All Companies' : `Filtered by: ${industries[nextIndex]}`);
   };
 
   if (loading) {
@@ -91,7 +140,7 @@ const Dashboard = () => {
               <h1 className="text-3xl font-bold text-gray-900">InvestorLens AI</h1>
               <p className="text-gray-600 mt-1">Portfolio Intelligence Platform</p>
             </div>
-            <button className="btn-primary">
+            <button onClick={handleAddCompany} className="btn-primary">
               + Add Company
             </button>
           </div>
@@ -138,8 +187,12 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Portfolio Companies</h2>
               <div className="flex gap-2">
-                <button className="btn-secondary text-sm">Filter</button>
-                <button className="btn-secondary text-sm">Sort</button>
+                <button onClick={handleFilter} className="btn-secondary text-sm">
+                  Filter {filterIndustry !== 'all' && `(${filterIndustry})`}
+                </button>
+                <button onClick={handleSort} className="btn-secondary text-sm">
+                  Sort {sortBy === 'risk_score' ? '(Risk)' : sortBy === 'current_arr' ? '(ARR)' : '(Name)'}
+                </button>
               </div>
             </div>
 
@@ -147,11 +200,17 @@ const Dashboard = () => {
               <div className="card text-center py-12">
                 <Building2 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600">No companies in portfolio yet.</p>
-                <button className="btn-primary mt-4">Add Your First Company</button>
+                <button onClick={handleAddCompany} className="btn-primary mt-4">Add Your First Company</button>
+              </div>
+            ) : displayedCompanies.length === 0 ? (
+              <div className="card text-center py-12">
+                <Building2 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600">No companies match the current filter.</p>
+                <button onClick={() => setFilterIndustry('all')} className="btn-secondary mt-4">Clear Filter</button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {companies.map((company) => (
+                {displayedCompanies.map((company) => (
                   <CompanyCard key={company.id} company={company} />
                 ))}
               </div>
