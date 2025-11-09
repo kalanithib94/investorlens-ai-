@@ -17,6 +17,17 @@ from app.models import Alert, AlertType, AlertSeverity, Company
 router = APIRouter(prefix="/api/alerts", tags=["Alerts"])
 
 
+# Request schemas
+class AlertCreate(BaseModel):
+    """Schema for creating an alert."""
+    company_id: int
+    alert_type: Optional[AlertType] = AlertType.RISK
+    severity: AlertSeverity
+    title: str
+    description: str
+    source: Optional[str] = "manual"
+
+
 # Response schemas
 class AlertResponse(BaseModel):
     """Alert response schema."""
@@ -96,6 +107,49 @@ async def get_alerts(
         result.append(AlertResponse(**alert_dict))
     
     return result
+
+
+@router.post("", response_model=AlertResponse, status_code=201)
+async def create_alert(
+    alert: AlertCreate,
+    db: Session = Depends(get_db)
+):
+    """Create a new alert for a company."""
+    # Verify company exists
+    company = db.query(Company).filter(Company.id == alert.company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail=f"Company with id {alert.company_id} not found")
+    
+    # Create alert
+    db_alert = Alert(
+        company_id=alert.company_id,
+        alert_type=alert.alert_type,
+        severity=alert.severity,
+        title=alert.title,
+        description=alert.description,
+        source=alert.source
+    )
+    
+    db.add(db_alert)
+    db.commit()
+    db.refresh(db_alert)
+    
+    # Return response with company name
+    alert_dict = {
+        "id": db_alert.id,
+        "company_id": db_alert.company_id,
+        "company_name": company.name,
+        "alert_type": db_alert.alert_type,
+        "severity": db_alert.severity,
+        "title": db_alert.title,
+        "description": db_alert.description,
+        "ai_summary": db_alert.ai_summary,
+        "is_read": db_alert.is_read,
+        "is_resolved": db_alert.is_resolved,
+        "created_at": db_alert.created_at
+    }
+    
+    return AlertResponse(**alert_dict)
 
 
 @router.get("/{alert_id}", response_model=AlertResponse)
