@@ -1,73 +1,68 @@
-"""Add realistic alerts for portfolio companies"""
+"""Add realistic alerts to demonstrate the AI monitoring system"""
 import requests
 
 API_URL = "https://portfolio-intelligence-production-58fa.up.railway.app"
 
-# Get companies first to get their IDs
+# Get companies first
 companies_response = requests.get(f"{API_URL}/api/companies")
 companies = companies_response.json()
 
 # Create a map of company names to IDs
-company_map = {}
-for c in companies:
-    company_map[c['name']] = c['id']
-    print(f"Found: {c['name']} (ID: {c['id']}, Risk: {c['risk_score']})")
+company_map = {c['name']: c['id'] for c in companies}
 
-print("\nAdding alerts...")
-
-# Add alerts based on actual risks
+# Realistic alerts based on actual company data
 alerts = [
     {
-        "company_id": company_map.get("RetailVision360"),  # Risk: 85, Runway: 5 months
+        "company_id": company_map.get("RetailVision360"),
+        "alert_type": "risk",
         "severity": "critical",
         "title": "Critical: Runway Below 6 Months",
-        "description": "RetailVision360 has only 5 months of runway remaining at current burn rate. Immediate fundraising or cost reduction required.",
-        "source": "automated_risk_analysis"
-    },
-    {
-        "company_id": company_map.get("PayFlow Secure"),  # Risk: 68, Runway: 10 months
-        "severity": "high",
-        "title": "High Burn Rate Detected",
-        "description": "Burn rate of $95K/month is high relative to $980K ARR. Revenue growth not keeping pace with expenses.",
-        "source": "financial_metrics"
-    },
-    {
-        "company_id": company_map.get("RetailVision360"),
-        "severity": "critical",
-        "title": "Negative Unit Economics Alert",
-        "description": "Customer acquisition cost exceeding lifetime value. Business model sustainability at risk.",
-        "source": "ai_analysis"
+        "description": "AI detected only 5 months runway. Immediate action: explore bridge funding or reduce burn 30%. Competitive analysis shows similar companies securing emergency rounds.",
+        "source": "ai_risk_analyzer"
     },
     {
         "company_id": company_map.get("PayFlow Secure"),
-        "severity": "high", 
-        "title": "Market Competition Intensifying",
-        "description": "3 new competitors raised funding in FinTech space. Market share protection strategy needed.",
-        "source": "competitive_intelligence"
+        "alert_type": "financial",
+        "severity": "high",
+        "title": "High Burn Rate Alert",
+        "description": "Burn multiple analysis: $95K monthly with $980K ARR = 11.6x burn rate. Industry benchmark: 6-8x. AI recommends immediate cost optimization.",
+        "source": "ai_financial_monitor"
     },
     {
-        "company_id": company_map.get("LearnHub Platform"),  # Risk: 48
+        "company_id": company_map.get("RetailVision360"),
+        "alert_type": "anomaly",
+        "severity": "high",
+        "title": "Customer Churn Spike Detected",
+        "description": "AI sentiment analysis of customer feedback shows 22% increase in negative sentiment. 2 major clients at risk based on usage patterns.",
+        "source": "ai_market_analyzer"
+    },
+    {
+        "company_id": company_map.get("Velocity Cloud Inc"),
+        "alert_type": "risk",
         "severity": "medium",
-        "title": "Churn Rate Increasing",
-        "description": "Customer churn up 12% QoQ. Product engagement metrics declining.",
-        "source": "analytics_engine"
+        "title": "Runway Approaching Threshold",
+        "description": "14-month runway detected. AI suggests fundraising timeline: start process in 6 months for 12-month Series B round.",
+        "source": "ai_risk_analyzer"
     },
     {
-        "company_id": company_map.get("EcoSmart Energy"),  # Risk: 18 - Low risk
-        "severity": "low",
-        "title": "Strong Performance - Expansion Opportunity",
-        "description": "ARR growing 40% YoY with healthy margins. Consider Series D fundraising for expansion.",
-        "source": "growth_analysis"
+        "company_id": company_map.get("LearnHub Platform"),
+        "alert_type": "news",
+        "severity": "medium",
+        "title": "Competitor Raised $50M Series B",
+        "description": "AI news scraping detected major competitor funding. Market consolidation likely. Recommend accelerating product roadmap.",
+        "source": "ai_news_monitor"
     },
     {
-        "company_id": company_map.get("HealthBridge Pro"),  # Risk: 22 - Low risk
+        "company_id": company_map.get("HealthBridge Pro"),
+        "alert_type": "opportunity",
         "severity": "low",
-        "title": "Positive Market Sentiment",
-        "description": "Recent news coverage highly positive. Brand awareness increasing in target market.",
-        "source": "news_sentiment"
+        "title": "Expansion Opportunity Identified",
+        "description": "AI market analysis: Strong metrics ($6.5M ARR, 24mo runway) + 3 strategic partnership opportunities in EU market detected.",
+        "source": "ai_growth_analyzer"
     }
 ]
 
+print("Adding alerts...")
 added = 0
 for alert in alerts:
     if alert['company_id']:
@@ -77,12 +72,9 @@ for alert in alerts:
                 print(f"[OK] {alert['severity'].upper()}: {alert['title'][:50]}...")
                 added += 1
             else:
-                print(f"[ERROR] Failed: {response.status_code}")
+                print(f"[ERROR] {response.status_code}: {response.text[:100]}")
         except Exception as e:
             print(f"[ERROR] {e}")
-    else:
-        print(f"[SKIP] Company not found for alert")
 
-print(f"\n{added} alerts added successfully!")
-print("\nRefresh your dashboard to see alerts!")
-
+print(f"\nAdded {added} alerts!")
+print("Refresh dashboard to see them.")
