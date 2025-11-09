@@ -34,7 +34,11 @@ class CompanyBase(BaseModel):
 
 class CompanyCreate(CompanyBase):
     """Schema for creating a company."""
-    pass
+    current_arr: Optional[float] = None
+    monthly_burn_rate: Optional[float] = None
+    runway_months: Optional[int] = None
+    employee_count: Optional[int] = None
+    risk_score: Optional[int] = Field(None, ge=0, le=100)
 
 
 class CompanyUpdate(BaseModel):
