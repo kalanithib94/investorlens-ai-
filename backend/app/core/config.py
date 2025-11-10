@@ -29,19 +29,34 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
+    CORS_ORIGINS: str = '["http://localhost:3000", "http://localhost:5173"]'
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
-    def parse_cors_origins(cls, v):
-        """Parse CORS_ORIGINS from JSON string if needed."""
+    def parse_cors_origins(cls, v) -> List[str]:
+        """Parse CORS_ORIGINS from JSON string or return list."""
+        print(f"🔍 RAW CORS_ORIGINS from env: {v}")
+        print(f"🔍 Type: {type(v)}")
+        
+        # If already a list, return it
+        if isinstance(v, list):
+            print(f"✅ Already a list with {len(v)} origins")
+            return v
+        
+        # If string, try to parse as JSON
         if isinstance(v, str):
             try:
-                # Try to parse as JSON string
-                return json.loads(v)
-            except json.JSONDecodeError:
-                # If not valid JSON, split by comma
-                return [origin.strip() for origin in v.split(',')]
+                parsed = json.loads(v)
+                print(f"✅ Parsed JSON successfully: {parsed}")
+                return parsed
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON parse failed: {e}")
+                # Fallback: split by comma
+                result = [origin.strip() for origin in v.split(',')]
+                print(f"⚠️ Using comma-split fallback: {result}")
+                return result
+        
+        print(f"⚠️ Unexpected type, returning as-is")
         return v
     
     # AI/LLM Keys
