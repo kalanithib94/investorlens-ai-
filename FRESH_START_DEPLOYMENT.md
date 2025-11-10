@@ -179,6 +179,49 @@ git log --oneline -5
 
 ## 🐛 Common Issues & Fixes
 
+### Issue: Wrong GitHub Repo Connected / URLs Keep Changing
+**Problem**: Vercel is deploying from wrong repository or creating new URLs
+
+**Fix - CLEAN START (Recommended)**:
+
+1. **Delete the Wrong Project**:
+   - Go to: https://vercel.com/kalanithib94s-projects/frontend/settings
+   - Scroll to bottom → **"Delete Project"**
+   - Type `frontend` to confirm
+   - Delete it
+
+2. **Create New Project with Correct Repo**:
+   - Go to: https://vercel.com/new
+   - Click "Add New..." → "Project"
+   - **Select: `kalanithib94/investorlens-ai-`** ← YOUR CORRECT REPO
+   - Click "Import"
+
+3. **Configure CORRECTLY**:
+   ```
+   Project Name: investorlens-ai (or any name you want)
+   Framework Preset: Vite
+   Root Directory: frontend    ⚠️ CRITICAL - DON'T SKIP!
+   Build Command: npm run build
+   Output Directory: dist
+   ```
+
+4. **Add Environment Variable**:
+   - Name: `VITE_API_URL`
+   - Value: `https://investorlens-ai-production.up.railway.app`
+   - Apply to: ✅ All (Production, Preview, Development)
+
+5. **Deploy** → You'll get a PERMANENT URL like:
+   - `https://investorlens-ai-xyz.vercel.app`
+
+6. **Make it Public**:
+   - After deployment, go to Settings → Deployment Protection
+   - Set to "Off" or "Only Preview Deployments"
+   - Save
+
+7. **Update Railway CORS** with your new Vercel URL
+
+---
+
 ### Issue: Vercel shows 404
 **Fix**: Check Root Directory is set to `frontend` in Settings
 
@@ -205,7 +248,8 @@ Once deployed, fill these in:
 ```
 ✅ GitHub:   https://github.com/kalanithib94/investorlens-ai-.git
 ✅ Railway:  https://investorlens-ai-production.up.railway.app
-⏳ Vercel:   https://__________________.vercel.app
+⚠️ OLD Vercel (WRONG REPO): https://frontend-kalanithib94s-projects.vercel.app/
+⏳ NEW Vercel: https://__________________.vercel.app
 ```
 
 ---
