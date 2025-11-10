@@ -31,7 +31,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware
+# CORS middleware - with debug logging
+logger.info(f"🔍 DEBUG: CORS_ORIGINS = {settings.CORS_ORIGINS}")
+logger.info(f"🔍 DEBUG: CORS_ORIGINS type = {type(settings.CORS_ORIGINS)}")
+logger.info(f"🔍 DEBUG: Number of origins = {len(settings.CORS_ORIGINS)}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -39,6 +43,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger.info("✅ CORS middleware configured successfully")
 
 
 # Request timing middleware
