@@ -31,20 +31,27 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS middleware - with debug logging
-logger.info(f"🔍 DEBUG: CORS_ORIGINS = {settings.CORS_ORIGINS}")
-logger.info(f"🔍 DEBUG: CORS_ORIGINS type = {type(settings.CORS_ORIGINS)}")
-logger.info(f"🔍 DEBUG: Number of origins = {len(settings.CORS_ORIGINS)}")
+# CORS middleware - TEMPORARY HARDCODED FIX
+# TODO: Remove hardcoding once Railway env var parsing is fixed
+HARDCODED_CORS = [
+    "http://localhost:3000",
+    "http://localhost:5173", 
+    "https://investorlens-ai.vercel.app",
+    "https://investorlens-ai-git-main-kalanithib94s-projects.vercel.app",
+]
+
+logger.info(f"🔍 DEBUG: CORS from settings = {settings.CORS_ORIGINS}")
+logger.info(f"🔍 DEBUG: Using HARDCODED CORS = {HARDCODED_CORS}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=HARDCODED_CORS,  # Using hardcoded list
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-logger.info("✅ CORS middleware configured successfully")
+logger.info("✅ CORS middleware configured with HARDCODED origins")
 
 
 # Request timing middleware
