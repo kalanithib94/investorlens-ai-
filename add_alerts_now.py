@@ -1,7 +1,7 @@
 """Add realistic alerts to demonstrate the AI monitoring system"""
 import requests
 
-API_URL = "https://portfolio-intelligence-production-58fa.up.railway.app"
+API_URL = "https://investorlens-ai-production.up.railway.app"
 
 # Get companies first
 companies_response = requests.get(f"{API_URL}/api/companies")

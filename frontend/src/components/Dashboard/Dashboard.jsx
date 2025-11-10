@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('risk_score'); // risk_score, current_arr, name
   const [filterIndustry, setFilterIndustry] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
@@ -81,7 +82,19 @@ const Dashboard = () => {
 
   // Button handlers
   const handleAddCompany = () => {
-    alert('Add Company feature coming soon! For demo, companies are pre-loaded.');
+    setShowAddModal(true);
+  };
+
+  const handleSubmitCompany = async (formData) => {
+    try {
+      await companiesAPI.create(formData);
+      setShowAddModal(false);
+      fetchDashboardData(); // Refresh data
+      alert('Company added successfully!');
+    } catch (err) {
+      console.error('Error adding company:', err);
+      alert('Failed to add company. Please try again.');
+    }
   };
 
   const handleSort = () => {
@@ -146,6 +159,14 @@ const Dashboard = () => {
           </div>
         </div>
       </header>
+
+      {/* Add Company Modal */}
+      {showAddModal && (
+        <AddCompanyModal 
+          onClose={() => setShowAddModal(false)}
+          onSubmit={handleSubmitCompany}
+        />
+      )}
 
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -242,6 +263,180 @@ const StatCard = ({ title, value, icon, iconColor, bgColor, trend }) => {
         <div className={`p-3 rounded-lg ${bgColor}`}>
           <div className={iconColor}>{icon}</div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Add Company Modal Component
+const AddCompanyModal = ({ onClose, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    industry: 'AI',
+    stage: 'Seed',
+    current_arr: '',
+    monthly_burn_rate: '',
+    runway_months: '',
+    employee_count: '',
+    risk_score: '',
+    is_active: true
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Convert string numbers to actual numbers
+    const processedData = {
+      ...formData,
+      current_arr: parseFloat(formData.current_arr) || 0,
+      monthly_burn_rate: parseFloat(formData.monthly_burn_rate) || 0,
+      runway_months: parseInt(formData.runway_months) || 0,
+      employee_count: parseInt(formData.employee_count) || 0,
+      risk_score: parseInt(formData.risk_score) || 50
+    };
+    onSubmit(processedData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4">Add New Company</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+            <input
+              type="text"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Acme Corp"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry *</label>
+            <select
+              name="industry"
+              required
+              value={formData.industry}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="AI">AI</option>
+              <option value="SaaS">SaaS</option>
+              <option value="FinTech">FinTech</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Retail">Retail</option>
+              <option value="CleanTech">CleanTech</option>
+              <option value="EdTech">EdTech</option>
+              <option value="Security">Security</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Stage *</label>
+            <select
+              name="stage"
+              required
+              value={formData.stage}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Seed">Seed</option>
+              <option value="Series A">Series A</option>
+              <option value="Series B">Series B</option>
+              <option value="Series C">Series C</option>
+              <option value="Series D+">Series D+</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Annual Recurring Revenue (ARR)</label>
+            <input
+              type="number"
+              name="current_arr"
+              value={formData.current_arr}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 2500000"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Burn Rate</label>
+            <input
+              type="number"
+              name="monthly_burn_rate"
+              value={formData.monthly_burn_rate}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 150000"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Runway (Months)</label>
+            <input
+              type="number"
+              name="runway_months"
+              value={formData.runway_months}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 12"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employee Count</label>
+            <input
+              type="number"
+              name="employee_count"
+              value={formData.employee_count}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 25"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Risk Score (0-100)</label>
+            <input
+              type="number"
+              name="risk_score"
+              min="0"
+              max="100"
+              value={formData.risk_score}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 35"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Add Company
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

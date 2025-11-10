@@ -1,7 +1,7 @@
 """Add companies with completely new names"""
 import requests
 
-API_URL = "https://portfolio-intelligence-production-58fa.up.railway.app"
+API_URL = "https://investorlens-ai-production.up.railway.app"
 
 companies = [
     {"name": "Quantum Dynamics Ltd", "industry": "AI", "stage": "Series B", "current_arr": 5200000, "monthly_burn_rate": 280000, "runway_months": 18, "risk_score": 35, "is_active": True, "employee_count": 45},
