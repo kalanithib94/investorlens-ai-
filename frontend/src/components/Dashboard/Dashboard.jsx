@@ -18,6 +18,10 @@ const Dashboard = () => {
   const [sortBy, setSortBy] = useState('risk_score'); // risk_score, current_arr, name
   const [filterIndustry, setFilterIndustry] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   // Fetch data on mount
   useEffect(() => {
@@ -97,6 +101,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleViewDetails = (company) => {
+    setSelectedCompany(company);
+    setShowDetailsModal(true);
+  };
+
   const handleSort = () => {
     // Cycle through sort options
     const sortOptions = ['risk_score', 'current_arr', 'name'];
@@ -168,6 +177,16 @@ const Dashboard = () => {
         />
       )}
 
+      {/* Company Details Modal */}
+      {showDetailsModal && selectedCompany && (
+        <CompanyDetailsModal 
+          company={selectedCompany}
+          onClose={() => {
+            setSelectedCompany(null);
+            setShowDetailsModal(false);
+          }}
+        />
+      )}
       {/* Stats Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -232,7 +251,11 @@ const Dashboard = () => {
             ) : (
               <div className="grid grid-cols-1 gap-4">
                 {displayedCompanies.map((company) => (
-                  <CompanyCard key={company.id} company={company} />
+                  <CompanyCard 
+                    key={company.id} 
+                    company={company} 
+                    onViewDetails={() => handleViewDetails(company)}
+                  />
                 ))}
               </div>
             )}
@@ -437,6 +460,77 @@ const AddCompanyModal = ({ onClose, onSubmit }) => {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Company Details Modal
+const CompanyDetailsModal = ({ company, onClose }) => {
+  const formatCurrency = (value) => {
+    if (!value) return 'N/A';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
+  };
+
+  const detailRows = [
+    { label: 'Company Name', value: company.name },
+    { label: 'Industry', value: company.industry || '—' },
+    { label: 'Stage', value: company.stage || '—' },
+    { label: 'ARR', value: formatCurrency(company.current_arr) },
+    { label: 'Monthly Burn', value: `${formatCurrency(company.monthly_burn_rate)}/mo` },
+    { label: 'Runway', value: company.runway_months ? `${company.runway_months} months` : '—' },
+    { label: 'Employees', value: company.employee_count || '—' },
+    { label: 'Risk Score', value: company.risk_score != null ? `${company.risk_score}/100` : '—' },
+    { label: 'Created', value: company.created_at ? new Date(company.created_at).toLocaleString() : '—' },
+    { label: 'Last Updated', value: company.updated_at ? new Date(company.updated_at).toLocaleString() : '—' },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">{company.name}</h2>
+            <p className="text-sm text-gray-500">Comprehensive portfolio profile</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {detailRows.map((row) => (
+            <div key={row.label} className="border border-gray-200 rounded-lg p-4">
+              <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">{row.label}</p>
+              <p className="text-sm font-semibold text-gray-900">{row.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 text-sm text-gray-600">
+          <p>
+            InvestorLens AI tracks key financial metrics and risk indicators for each portfolio company. 
+            Risk scores update automatically when financial data changes. Use this view to quickly understand 
+            company health, capital runway, and any areas needing attention.
+          </p>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

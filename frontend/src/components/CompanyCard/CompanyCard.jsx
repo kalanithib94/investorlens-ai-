@@ -6,7 +6,7 @@
 import { Building2, TrendingUp, TrendingDown, Calendar, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-const CompanyCard = ({ company }) => {
+const CompanyCard = ({ company, onViewDetails }) => {
   // Determine risk level and color
   const getRiskLevel = (score) => {
     if (score < 26) return { level: 'Low', color: 'success' };
@@ -103,7 +103,10 @@ const CompanyCard = ({ company }) => {
           <Calendar className="w-3 h-3" />
           Updated {company.updated_at ? formatDistanceToNow(new Date(company.updated_at), { addSuffix: true }) : 'recently'}
         </div>
-        <button className="text-primary-600 hover:text-primary-700 font-medium">
+        <button 
+          className="text-primary-600 hover:text-primary-700 font-medium"
+          onClick={onViewDetails}
+        >
           View Details →
         </button>
       </div>
