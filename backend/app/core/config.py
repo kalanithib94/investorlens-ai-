@@ -4,9 +4,11 @@ Demonstrates: DevOps best practices, environment management
 """
 
 from functools import lru_cache
-from typing import List
+from typing import List, Union
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, field_validator
+import json
+import os
 
 
 class Settings(BaseSettings):
@@ -28,6 +30,19 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
+    
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS_ORIGINS from JSON string if needed."""
+        if isinstance(v, str):
+            try:
+                # Try to parse as JSON string
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If not valid JSON, split by comma
+                return [origin.strip() for origin in v.split(',')]
+        return v
     
     # AI/LLM Keys
     OPENAI_API_KEY: str = ""
